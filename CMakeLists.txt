@@ -7,4 +7,6 @@ set(CMAKE_CXX_STANDARD 14)
 
 add_executable(
         assign4
-        main.cpp)
+        main.cpp
+        buffer.cpp
+        buffer.h)
