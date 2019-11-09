@@ -12,14 +12,8 @@ How To Run Program:
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
-#include <sys/wait.h>
-#include <stdlib.h>
-#include <string>
-#include <cstring>
-#include <vector>
 #include <pthread.h>
 #include <semaphore.h>
-#include <algorithm>
 #include <time.h>
 #include "buffer.h"
 using namespace std;
