@@ -17,6 +17,7 @@ How To Run Program:
 #include <string>
 #include <cstring>
 #include <vector>
+#include "buffer.h"
 using namespace std;
 
 
@@ -41,5 +42,60 @@ int main(int argc, char** argv) {
         cout << "- number of consumer threads to create (positive integer or zero)\n";
     }
 
+
+    /* 1. Get command line arguments argv[1],argv[2],argv[3] */
+
+    /* 2. Initialize buffer */
+
+    /* 3. Create producer thread(s) */
+
+    /* 4. Create consumer thread(s) */
+
+    /* 5. Sleep */
+
+    /* 6. Exit */
+
     return 0;
+}
+
+
+void *producer(void *param) {
+
+    buffer_item item;
+
+    while (true) {
+        /* sleep for a random period of time */
+
+        sleep(...);
+
+        /* generate a random number */
+
+        item = rand();
+
+        if (buffer().insert_item(item)) {
+            printf("report error condition");
+        } else {
+            printf("producer produced %d\n", item);
+        }
+
+    }
+}
+
+void *consumer(void *param) {
+
+    buffer_item item;
+
+    while (true) {
+
+        /* sleep for a random period of time */
+
+        sleep(...);
+
+        if (buffer().remove_item(&item)) {
+            fprintf("report error condition");
+        } else {
+            printf("consumer consumed %d\n",item);
+        }
+    }
+
 }
