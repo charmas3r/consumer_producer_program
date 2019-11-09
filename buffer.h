@@ -1,5 +1,5 @@
 //
-// Created by User on 11/9/2019.
+// Created by Evan Smith on 11/9/2019.
 //
 
 #ifndef ASSIGNMENT4_BUFFER_H
