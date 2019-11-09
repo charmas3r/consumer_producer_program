@@ -20,8 +20,8 @@ using namespace std;
 
 #define NEC_ARG_COUNT 4
 pthread_mutex_t mutex;
-sem_t full;
-sem_t empty;
+sem_t full_sem;
+sem_t empty_sem;
 
 
 void *producer(void *param) {
@@ -30,7 +30,7 @@ void *producer(void *param) {
 
     while (true) {
         /* sleep for a random period of time */
-        sleep(rand());
+        usleep(rand());
         /* generate a random number */
         item = rand();
         if (buffer().insert_item(item)) {
@@ -89,9 +89,9 @@ int main(int argc, char** argv) {
 
 
     //comment out when done (testing purposes)
-    int main_thread_sleep_time = 0;
-    int producer_thread_count = 0;
-    int consumer_thread_count = 0;
+    unsigned int main_thread_sleep_time = 1;
+    unsigned int producer_thread_count = 0;
+    unsigned int consumer_thread_count = 0;
 
     if(argc <= 1) {
         cout << "\n\n";
@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
     srand(time(NULL));
     pthread_t producer_threads[producer_thread_count];
     pthread_t consumer_threads[consumer_thread_count];
-    sem_init(&empty, 0, BUFFER_SIZE);
+    sem_init(&empty_sem, 0, BUFFER_SIZE);
 
     /* 3. Create producer thread(s) */
 
