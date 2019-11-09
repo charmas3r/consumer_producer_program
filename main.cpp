@@ -96,11 +96,12 @@ int main(int argc, char** argv) {
         cout << "usage: ./assignment4 <time(s)> <#producer_threads> <#consumer_threads>\n";
     }
 
+
+    //comment out when done (testing purposes)
     int main_thread_time;
     int producer_thread_count;
     int consumer_thread_count;
 
-    //comment out when done (testing purposes)
     if(argc <= 1) {
         cout << "\n\n";
         cout << "Enter time: ";
@@ -131,15 +132,16 @@ int main(int argc, char** argv) {
         cout << "produced a producer thread" << endl;
     }
 
+    /* 4. Create consumer thread(s) */
+
     for (pthread_t consumer_thread : consumer_threads) {
         pthread_create(&consumer_thread, nullptr, consumer, nullptr);
         cout << "produced a consumer thread" << endl;
     }
 
-
-    /* 4. Create consumer thread(s) */
-
     /* 5. Sleep */
+
+    sleep(main_thread_time);
 
     /* 6. Exit */
 
