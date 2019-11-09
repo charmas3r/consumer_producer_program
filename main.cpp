@@ -20,10 +20,11 @@ How To Run Program:
 #include <pthread.h>
 #include <semaphore.h>
 #include <algorithm>
+#include <time.h>
 #include "buffer.h"
 using namespace std;
 
-
+#define NEC_ARG_COUNT 4
 pthread_mutex_t mutex;
 sem_t full;
 sem_t empty;
@@ -31,25 +32,21 @@ sem_t empty;
 
 void *producer(void *param) {
 
-//    buffer_item item;
-//
-//    while (true) {
-//        /* sleep for a random period of time */
-//
-////        sleep();
-//
-//        /* generate a random number */
-//
-//        item = rand();
-//
-//        if (buffer().insert_item(item)) {
-//            printf("report error condition");
-//        } else {
-//            printf("producer produced %d\n", item);
-//            break;
-//        }
-//
-//    }
+    buffer_item item;
+
+    while (true) {
+        /* sleep for a random period of time */
+        sleep(rand());
+        /* generate a random number */
+        item = rand();
+        if (buffer().insert_item(item)) {
+            printf("report error condition");
+        } else {
+            printf("producer produced %d\n", item);
+            break;
+        }
+
+    }
 }
 
 void *consumer(void *param) {
@@ -76,7 +73,7 @@ void *consumer(void *param) {
 
 int main(int argc, char** argv) {
 
-    //begining output
+    //beginning output
     printf("============================================================================ \n");
     printf("CS 433: Assignment 4 \n");
     printf("Authors: Evan Smith & Andrew Tse \n");
@@ -87,7 +84,7 @@ int main(int argc, char** argv) {
     cout << endl;
 
     // Checks if the user provided the correct command line inputs
-    if(argc <= 3 || argc >5)
+    if(argc != NEC_ARG_COUNT)
     {
         cout << "three command-line arguments:\n";
         cout << "- how long main thread should run before sleeping (in seconds, positive integer that is nonzero)\n";
@@ -98,14 +95,14 @@ int main(int argc, char** argv) {
 
 
     //comment out when done (testing purposes)
-    int main_thread_time;
-    int producer_thread_count;
-    int consumer_thread_count;
+    int main_thread_sleep_time = 0;
+    int producer_thread_count = 0;
+    int consumer_thread_count = 0;
 
     if(argc <= 1) {
         cout << "\n\n";
         cout << "Enter time: ";
-        cin >> main_thread_time;
+        cin >> main_thread_sleep_time;
         cout << "Producer threads: ";
         cin >> producer_thread_count;
         cout << "Consumer  threads: ";
@@ -121,6 +118,7 @@ int main(int argc, char** argv) {
 
     /* 2. Initialization */
 
+    srand(time(NULL));
     pthread_t producer_threads[producer_thread_count];
     pthread_t consumer_threads[consumer_thread_count];
     sem_init(&empty, 0, BUFFER_SIZE);
@@ -129,19 +127,19 @@ int main(int argc, char** argv) {
 
     for (pthread_t producer_thread : producer_threads) {
         pthread_create(&producer_thread, nullptr, producer, nullptr);
-        cout << "produced a producer thread" << endl;
+        cout << "created a producer thread" << endl;
     }
 
     /* 4. Create consumer thread(s) */
 
     for (pthread_t consumer_thread : consumer_threads) {
         pthread_create(&consumer_thread, nullptr, consumer, nullptr);
-        cout << "produced a consumer thread" << endl;
+        cout << "created a consumer thread" << endl;
     }
 
     /* 5. Sleep */
 
-    sleep(main_thread_time);
+    sleep(main_thread_sleep_time);
 
     /* 6. Exit */
 

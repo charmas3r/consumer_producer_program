@@ -18,6 +18,9 @@ int buffer::insert_item(buffer_item item) {
 
    return -1 indicating an error condition */
 
+    buffer[position] = item;
+
+
 }
 
 
