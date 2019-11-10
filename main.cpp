@@ -15,13 +15,20 @@ How To Run Program:
 #include <pthread.h>
 #include <semaphore.h>
 #include <time.h>
+#include <random>
 #include "buffer.h"
+
 using namespace std;
 
 #define NEC_ARG_COUNT 4
 pthread_mutex_t mutex;
 sem_t full_sem;
 sem_t empty_sem;
+
+//some tools to generate random numbers inside our threads
+random_device device;
+mt19937 generator(device());
+uniform_int_distribution<int> distribution(1,9);
 
 
 void *producer(void *param) {
@@ -30,13 +37,15 @@ void *producer(void *param) {
 
     while (true) {
         /* sleep for a random period of time */
-        usleep(rand());
+        int sleep_time = distribution(generator);
+        cout << "PRODUCER THREAD: producer thread sleeping for " << sleep_time << endl;
+        sleep(sleep_time);
         /* generate a random number */
-        item = rand();
+        item = distribution(generator);
         if (buffer().insert_item(item)) {
-            printf("report error condition");
+            printf("PRODUCER THREAD: report error condition\n");
         } else {
-            printf("producer produced %d\n", item);
+            printf("PRODUCER THREAD: producer produced %d\n", item);
             break;
         }
 
@@ -44,22 +53,23 @@ void *producer(void *param) {
 }
 
 void *consumer(void *param) {
-//
-//    buffer_item item;
-//
-//    while (true) {
-//
-//        /* sleep for a random period of time */
-//
-////        sleep(...);
-//
-//        if (buffer().remove_item(&item)) {
-//            printf("report error condition");
-//        } else {
-//            printf("consumer consumed %d\n",item);
-//            break; //delete
-//        }
-//    }
+
+    buffer_item item;
+
+    while (true) {
+
+        /* sleep for a random period of time */
+        int sleep_time = distribution(generator);
+        cout << "CONSUMER THREAD: consumer thread sleeping for " << sleep_time << endl;
+        sleep(sleep_time);
+
+        if (buffer().remove_item(&item)) {
+            printf("CONSUMER THREAD: report error condition\n");
+        } else {
+            printf("CONSUMER THREAD: consumer consumed %d\n",item);
+            break; //delete
+        }
+    }
 
 }
 
@@ -112,7 +122,6 @@ int main(int argc, char** argv) {
 
     /* 2. Initialization */
 
-    srand(time(NULL));
     pthread_t producer_threads[producer_thread_count];
     pthread_t consumer_threads[consumer_thread_count];
     sem_init(&empty_sem, 0, BUFFER_SIZE);
@@ -121,14 +130,14 @@ int main(int argc, char** argv) {
 
     for (pthread_t producer_thread : producer_threads) {
         pthread_create(&producer_thread, nullptr, producer, nullptr);
-        cout << "created a producer thread" << endl;
+        cout << "MAIN: created a producer thread" << endl;
     }
 
     /* 4. Create consumer thread(s) */
 
     for (pthread_t consumer_thread : consumer_threads) {
         pthread_create(&consumer_thread, nullptr, consumer, nullptr);
-        cout << "created a consumer thread" << endl;
+        cout << "MAIN: created a consumer thread" << endl;
     }
 
     /* 5. Sleep */

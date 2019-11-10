@@ -2,12 +2,14 @@
 // Created by Evan Smith on 11/9/2019.
 //
 
+#include <iostream>
 #include "buffer.h"
 
 /* the buffer */
-
-
-buffer_item buffer[BUFFER_SIZE];
+buffer_item circular_buffer[BUFFER_SIZE];
+int write_position = 0;
+int read_position = 0;
+int buffer_count = 0;
 
 
 int buffer::insert_item(buffer_item item) {
@@ -18,9 +20,17 @@ int buffer::insert_item(buffer_item item) {
 
    return -1 indicating an error condition */
 
-    buffer[position] = item;
+    std::cout << " inserting item: " << item << std::endl;
+    std::cout << " size of buffer: " << buffer_count << std::endl;
 
-
+    if (buffer_count <= BUFFER_SIZE) {
+        circular_buffer[write_position] = item;
+        write_position = (write_position + 1) % BUFFER_SIZE; //wrap
+        ++buffer_count;
+        return 0;
+    } else {
+        return -1;
+    }
 }
 
 
@@ -33,5 +43,18 @@ int buffer::remove_item(buffer_item *item) {
    return 0 if successful, otherwise
 
    return -1 indicating an error condition */
+
+    std::cout << "removing item: " << item << std::endl;
+    std::cout << "size of buffer: " << buffer_count << std::endl;
+
+    if (buffer_count > 1) {
+        // ok to remove
+        *item = circular_buffer[read_position];
+        read_position = (read_position + 1) % BUFFER_SIZE;
+        --buffer_count;
+        return 0;
+    } else {
+        return -1;
+    }
 
 }
