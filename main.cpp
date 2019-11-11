@@ -40,7 +40,9 @@ void *producer(void *param) {
         int sleep_time = distribution(generator);
         cout << "PRODUCER THREAD: producer thread sleeping for " << sleep_time << endl;
         sleep(sleep_time);
-        /* generate a random number */
+        sem_wait(&empty_sem);
+        pthread_mutex_lock(&mutex);
+        /* generate a random number and enter critical section */
         item = distribution(generator);
         if (buffer().insert_item(item)) {
             printf("PRODUCER THREAD: report error condition\n");
@@ -48,7 +50,9 @@ void *producer(void *param) {
             printf("PRODUCER THREAD: producer produced %d\n", item);
             break;
         }
-
+        /* end of critical section */
+        pthread_mutex_unlock(&mutex);
+        sem_post(&full_sem);
     }
 }
 
@@ -62,13 +66,18 @@ void *consumer(void *param) {
         int sleep_time = distribution(generator);
         cout << "CONSUMER THREAD: consumer thread sleeping for " << sleep_time << endl;
         sleep(sleep_time);
-
+        sem_wait(&full_sem);
+        pthread_mutex_lock(&mutex);
+        /* enter critcal section */
         if (buffer().remove_item(&item)) {
             printf("CONSUMER THREAD: report error condition\n");
         } else {
             printf("CONSUMER THREAD: consumer consumed %d\n",item);
             break; //delete
         }
+        /* end critical section */
+        pthread_mutex_unlock(&mutex);
+        sem_post(&empty_sem);
     }
 
 }
@@ -125,6 +134,8 @@ int main(int argc, char** argv) {
     pthread_t producer_threads[producer_thread_count];
     pthread_t consumer_threads[consumer_thread_count];
     sem_init(&empty_sem, 0, BUFFER_SIZE);
+    sem_init(&full_sem, 0, 0);
+    pthread_mutex_init(&mutex, NULL);
 
     /* 3. Create producer thread(s) */
 
