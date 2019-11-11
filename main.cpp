@@ -45,7 +45,7 @@ void *producer(void *param) {
         usleep(sleep_dist(generator));
         sem_wait(&empty_sem);
         pthread_mutex_lock(&mutex);
-        /* generate a random number and enter critical section */
+        /* beginning of critical section */
         if (buffer().insert_item(item_dist(generator)) == 1) {
             printf("PRODUCER THREAD: report error condition\n");
         } else {
@@ -67,7 +67,7 @@ void *consumer(void *param) {
         usleep(sleep_dist(generator));
         sem_wait(&full_sem);
         pthread_mutex_lock(&mutex);
-        /* enter critcal section */
+        /* beginning of critcal section */
         if (buffer().remove_item(&item) == 1) {
             printf("CONSUMER THREAD: report error condition\n");
         } else {
@@ -102,7 +102,6 @@ int main(int argc, char **argv) {
         cout << "usage: ./assignment4 <time(s)> <#producer_threads> <#consumer_threads>\n";
     }
 
-    //comment out when done (testing purposes)
     unsigned int main_thread_sleep_time = 1;
     unsigned int producer_thread_count = 0;
     unsigned int consumer_thread_count = 0;
