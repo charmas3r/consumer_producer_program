@@ -13,13 +13,6 @@ int buffer_count = 0;
 
 
 int buffer::insert_item(buffer_item item) {
-
-    /* insert item into buffer
-
-   return 0 if successful, otherwise
-
-   return -1 indicating an error condition */
-
     if (buffer_count < BUFFER_SIZE) {
         circular_buffer[write_position] = item;
         write_position = (write_position + 1) % BUFFER_SIZE; //wrap
@@ -32,15 +25,6 @@ int buffer::insert_item(buffer_item item) {
 
 
 int buffer::remove_item(buffer_item *item) {
-
-    /* remove an object from buffer
-
-   placing it in item
-
-   return 0 if successful, otherwise
-
-   return -1 indicating an error condition */
-
     if (buffer_count > 1) {
         // ok to remove
         *item = circular_buffer[read_position];
@@ -50,7 +34,6 @@ int buffer::remove_item(buffer_item *item) {
     } else {
         return -1;
     }
-
 }
 
 
