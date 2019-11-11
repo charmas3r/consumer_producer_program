@@ -28,7 +28,9 @@ sem_t empty_sem;
 //some tools to generate random numbers inside our threads
 random_device device;
 mt19937 generator(device());
-uniform_int_distribution<int> distribution(1,9);
+uniform_int_distribution<int> sleep_dist(1, 2000);
+uniform_int_distribution<int> item_dist(1,99);
+
 
 
 void *producer(void *param) {
@@ -37,17 +39,17 @@ void *producer(void *param) {
 
     while (true) {
         /* sleep for a random period of time */
-        int sleep_time = distribution(generator);
-        cout << "PRODUCER THREAD: producer thread sleeping for " << sleep_time << endl;
-        sleep(sleep_time);
+        int sleep_time = sleep_dist(generator);
+        usleep(sleep_time);
         sem_wait(&empty_sem);
         pthread_mutex_lock(&mutex);
         /* generate a random number and enter critical section */
-        item = distribution(generator);
-        if (buffer().insert_item(item)) {
+        item = item_dist(generator);
+        if (buffer().insert_item(item) == 1) {
             printf("PRODUCER THREAD: report error condition\n");
         } else {
-            printf("PRODUCER THREAD: producer produced %d\n", item);
+            printf("\nitem %d inserted by a producer.\n", item);
+            buffer().display_buffer();
             break;
         }
         /* end of critical section */
@@ -63,16 +65,16 @@ void *consumer(void *param) {
     while (true) {
 
         /* sleep for a random period of time */
-        int sleep_time = distribution(generator);
-        cout << "CONSUMER THREAD: consumer thread sleeping for " << sleep_time << endl;
+        int sleep_time = sleep_dist(generator);
         sleep(sleep_time);
         sem_wait(&full_sem);
         pthread_mutex_lock(&mutex);
         /* enter critcal section */
-        if (buffer().remove_item(&item)) {
+        if (buffer().remove_item(&item) == 1) {
             printf("CONSUMER THREAD: report error condition\n");
         } else {
-            printf("CONSUMER THREAD: consumer consumed %d\n",item);
+            printf("item %d removed by a consumer.\n",item);
+            buffer().display_buffer();
             break; //delete
         }
         /* end critical section */
@@ -141,14 +143,12 @@ int main(int argc, char** argv) {
 
     for (pthread_t producer_thread : producer_threads) {
         pthread_create(&producer_thread, nullptr, producer, nullptr);
-        cout << "MAIN: created a producer thread" << endl;
     }
 
     /* 4. Create consumer thread(s) */
 
     for (pthread_t consumer_thread : consumer_threads) {
         pthread_create(&consumer_thread, nullptr, consumer, nullptr);
-        cout << "MAIN: created a consumer thread" << endl;
     }
 
     /* 5. Sleep */

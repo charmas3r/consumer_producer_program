@@ -6,7 +6,7 @@
 #include "buffer.h"
 
 /* the buffer */
-buffer_item circular_buffer[BUFFER_SIZE];
+buffer_item circular_buffer[BUFFER_SIZE] = {};
 int write_position = 0;
 int read_position = 0;
 int buffer_count = 0;
@@ -19,9 +19,6 @@ int buffer::insert_item(buffer_item item) {
    return 0 if successful, otherwise
 
    return -1 indicating an error condition */
-
-    std::cout << " inserting item: " << item << std::endl;
-    std::cout << " size of buffer: " << buffer_count << std::endl;
 
     if (buffer_count <= BUFFER_SIZE) {
         circular_buffer[write_position] = item;
@@ -44,9 +41,6 @@ int buffer::remove_item(buffer_item *item) {
 
    return -1 indicating an error condition */
 
-    std::cout << "removing item: " << item << std::endl;
-    std::cout << "size of buffer: " << buffer_count << std::endl;
-
     if (buffer_count > 1) {
         // ok to remove
         *item = circular_buffer[read_position];
@@ -57,4 +51,22 @@ int buffer::remove_item(buffer_item *item) {
         return -1;
     }
 
+}
+
+
+void buffer::display_buffer() {
+    int temp_counter = buffer_count;
+    if (buffer_count > 0) {
+        std::cout << "The current content of the buffer is [";
+        for (buffer_item x : circular_buffer) {
+            --temp_counter;
+            if (temp_counter == 0) {
+                std::cout << x << "]" << std::endl;
+            } else {
+                std::cout << x << ", ";
+            }
+        }
+    } else {
+        std::cout << "]" << std::endl;
+    }
 }
