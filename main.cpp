@@ -14,13 +14,17 @@ How To Run Program:
 #include <iostream>
 #include <pthread.h>
 #include <semaphore.h>
-#include <time.h>
 #include <random>
 #include "buffer.h"
 
 using namespace std;
 
 #define NEC_ARG_COUNT 4
+#define MIN_SLEEP_DIST 1
+#define MAX_SLEEP_DIST 2000
+#define MIN_ITEM_DIST 1
+#define MAX_ITEM_DIST 99
+
 pthread_mutex_t mutex;
 sem_t full_sem;
 sem_t empty_sem;
@@ -28,8 +32,8 @@ sem_t empty_sem;
 //some tools to generate random numbers inside our threads
 random_device device;
 mt19937 generator(device());
-uniform_int_distribution<int> sleep_dist(1, 2000);
-uniform_int_distribution<int> item_dist(1, 99);
+uniform_int_distribution<int> sleep_dist(MIN_SLEEP_DIST, MAX_SLEEP_DIST);
+uniform_int_distribution<int> item_dist(MIN_ITEM_DIST, MAX_ITEM_DIST);
 
 
 void *producer(void *param) {
@@ -38,13 +42,11 @@ void *producer(void *param) {
 
     while (true) {
         /* sleep for a random period of time */
-        int sleep_time = sleep_dist(generator);
-        usleep(sleep_time);
+        usleep(sleep_dist(generator));
         sem_wait(&empty_sem);
         pthread_mutex_lock(&mutex);
         /* generate a random number and enter critical section */
-        item = item_dist(generator);
-        if (buffer().insert_item(item) == 1) {
+        if (buffer().insert_item(item_dist(generator)) == 1) {
             printf("PRODUCER THREAD: report error condition\n");
         } else {
             printf("\nitem %d inserted by a producer.\n", item);
@@ -62,8 +64,7 @@ void *consumer(void *param) {
 
     while (true) {
         /* sleep for a random period of time */
-        int sleep_time = sleep_dist(generator);
-        usleep(sleep_time);
+        usleep(sleep_dist(generator));
         sem_wait(&full_sem);
         pthread_mutex_lock(&mutex);
         /* enter critcal section */
@@ -114,12 +115,11 @@ int main(int argc, char **argv) {
         cin >> producer_thread_count;
         cout << "Consumer  threads: ";
         cin >> consumer_thread_count;
+    } else {
+        main_thread_sleep_time = atoi(argv[1]);
+        producer_thread_count = atoi(argv[2]);
+        consumer_thread_count = atoi(argv[3]);
     }
-
-    //uncomment later
-//    int main_thread_time = atoi(argv[1]);
-//    int producter_thread_count = atoi(argv[2]);
-//    int consumer_thread_count = atoi(argv[3]);
 
     pthread_t producer_threads[producer_thread_count];
     pthread_t consumer_threads[consumer_thread_count];
