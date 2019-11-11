@@ -115,16 +115,16 @@ int main(int argc, char **argv) {
         cout << "Consumer  threads: ";
         cin >> consumer_thread_count;
     } else {
-        main_thread_sleep_time = atoi(argv[1]);
-        producer_thread_count = atoi(argv[2]);
-        consumer_thread_count = atoi(argv[3]);
+        main_thread_sleep_time = (unsigned) atoi(argv[1]);
+        producer_thread_count = (unsigned) atoi(argv[2]);
+        consumer_thread_count = (unsigned) atoi(argv[3]);
     }
 
     pthread_t producer_threads[producer_thread_count];
     pthread_t consumer_threads[consumer_thread_count];
     sem_init(&empty_sem, 0, BUFFER_SIZE);
     sem_init(&full_sem, 0, 0);
-    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&mutex, nullptr);
 
     for (pthread_t producer_thread : producer_threads) {
         pthread_create(&producer_thread, nullptr, producer, nullptr);
