@@ -20,7 +20,7 @@ int buffer::insert_item(buffer_item item) {
 
    return -1 indicating an error condition */
 
-    if (buffer_count <= BUFFER_SIZE) {
+    if (buffer_count < BUFFER_SIZE) {
         circular_buffer[write_position] = item;
         write_position = (write_position + 1) % BUFFER_SIZE; //wrap
         ++buffer_count;
@@ -62,8 +62,10 @@ void buffer::display_buffer() {
             --temp_counter;
             if (temp_counter == 0) {
                 std::cout << x << "]" << std::endl;
-            } else {
+            } else if (temp_counter > 0) {
                 std::cout << x << ", ";
+            } else {
+                break;
             }
         }
     } else {

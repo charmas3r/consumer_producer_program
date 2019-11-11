@@ -50,7 +50,6 @@ void *producer(void *param) {
         } else {
             printf("\nitem %d inserted by a producer.\n", item);
             buffer().display_buffer();
-            break;
         }
         /* end of critical section */
         pthread_mutex_unlock(&mutex);
@@ -63,19 +62,17 @@ void *consumer(void *param) {
     buffer_item item;
 
     while (true) {
-
         /* sleep for a random period of time */
         int sleep_time = sleep_dist(generator);
-        sleep(sleep_time);
+        usleep(sleep_time);
         sem_wait(&full_sem);
         pthread_mutex_lock(&mutex);
         /* enter critcal section */
         if (buffer().remove_item(&item) == 1) {
             printf("CONSUMER THREAD: report error condition\n");
         } else {
-            printf("item %d removed by a consumer.\n",item);
+            printf("\nitem %d removed by a consumer.\n",item);
             buffer().display_buffer();
-            break; //delete
         }
         /* end critical section */
         pthread_mutex_unlock(&mutex);
