@@ -5,12 +5,10 @@
 #include <iostream>
 #include "buffer.h"
 
-/* the buffer */
 buffer_item circular_buffer[BUFFER_SIZE] = {};
 int write_position = 0;
 int read_position = 0;
 int buffer_count = 0;
-
 
 int buffer::insert_item(buffer_item item) {
     if (buffer_count < BUFFER_SIZE) {
@@ -23,7 +21,6 @@ int buffer::insert_item(buffer_item item) {
     }
 }
 
-
 int buffer::remove_item(buffer_item *item) {
     if (buffer_count > 1) {
         // ok to remove
@@ -35,7 +32,6 @@ int buffer::remove_item(buffer_item *item) {
         return -1;
     }
 }
-
 
 void buffer::display_buffer() {
     int temp_counter = buffer_count;

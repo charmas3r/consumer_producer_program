@@ -8,10 +8,12 @@
 #define BUFFER_SIZE 5
 typedef int buffer_item;
 
-class buffer{
+class buffer {
 public:
     int insert_item(buffer_item item);
+
     int remove_item(buffer_item *item);
+
     void display_buffer();
 };
 
