@@ -12,18 +12,79 @@ How To Run Program:
 #include <stdio.h>
 #include <unistd.h>
 #include <iostream>
-#include <sys/wait.h>
-#include <stdlib.h>
-#include <string>
-#include <cstring>
-#include <vector>
+#include <pthread.h>
+#include <semaphore.h>
+#include <random>
 #include "buffer.h"
+
 using namespace std;
 
+#define NEC_ARG_COUNT 4
+#define MIN_SLEEP_DIST 1
+#define MAX_SLEEP_DIST 2000
+#define MIN_ITEM_DIST 1
+#define MAX_ITEM_DIST 99
 
-int main(int argc, char** argv) {
+pthread_mutex_t mutex;
+sem_t full_sem;
+sem_t empty_sem;
 
-    //begining output
+//some tools to generate random numbers inside our threads
+random_device device;
+mt19937 generator(device());
+uniform_int_distribution<int> sleep_dist(MIN_SLEEP_DIST, MAX_SLEEP_DIST);
+uniform_int_distribution<int> item_dist(MIN_ITEM_DIST, MAX_ITEM_DIST);
+
+
+void *producer(void *param) {
+
+    buffer_item item;
+
+    while (true) {
+        /* sleep for a random period of time */
+        usleep(sleep_dist(generator));
+        sem_wait(&empty_sem);
+        pthread_mutex_lock(&mutex);
+        item = item_dist(generator);
+        /* beginning of critical section */
+        if (buffer().insert_item(item) == 1) {
+            printf("PRODUCER THREAD: report error condition\n");
+        } else {
+            printf("\nitem %d inserted by a producer.\n", item);
+            buffer().display_buffer();
+        }
+        /* end of critical section */
+        pthread_mutex_unlock(&mutex);
+        sem_post(&full_sem);
+    }
+}
+
+void *consumer(void *param) {
+
+    buffer_item item;
+
+    while (true) {
+        /* sleep for a random period of time */
+        usleep(sleep_dist(generator));
+        sem_wait(&full_sem);
+        pthread_mutex_lock(&mutex);
+        /* beginning of critical section */
+        if (buffer().remove_item(&item) == 1) {
+            printf("CONSUMER THREAD: report error condition\n");
+        } else {
+            printf("\nitem %d removed by a consumer.\n", item);
+            buffer().display_buffer();
+        }
+        /* end critical section */
+        pthread_mutex_unlock(&mutex);
+        sem_post(&empty_sem);
+    }
+}
+
+
+int main(int argc, char **argv) {
+
+    //beginning output
     printf("============================================================================ \n");
     printf("CS 433: Assignment 4 \n");
     printf("Authors: Evan Smith & Andrew Tse \n");
@@ -34,68 +95,52 @@ int main(int argc, char** argv) {
     cout << endl;
 
     // Checks if the user provided the correct command line inputs
-    if(argc <= 3 || argc >5)
-    {
+    if (argc != NEC_ARG_COUNT) {
         cout << "three command-line arguments:\n";
-        cout << "- amount of time to run the program (in seconds, positive integer that is nonzero)\n";
+        cout << "- how long main thread should run before sleeping (in seconds, positive integer that is nonzero)\n";
         cout << "- number of producer threads to create (positive integer or zero)\n";
-        cout << "- number of consumer threads to create (positive integer or zero)\n";
+        cout << "- number of consumer threads to create (positive integer or zero)\n\n";
+        cout << "usage: ./assignment4 <time(s)> <#producer_threads> <#consumer_threads>\n";
     }
 
+    unsigned int main_thread_sleep_time = 1;
+    unsigned int producer_thread_count = 0;
+    unsigned int consumer_thread_count = 0;
 
-    /* 1. Get command line arguments argv[1],argv[2],argv[3] */
+    if (argc <= 1) {
+        cout << "\n\n";
+        cout << "Enter time: ";
+        cin >> main_thread_sleep_time;
+        cout << "Producer threads: ";
+        cin >> producer_thread_count;
+        cout << "Consumer  threads: ";
+        cin >> consumer_thread_count;
+    } else {
+        main_thread_sleep_time = (unsigned) atoi(argv[1]);
+        producer_thread_count = (unsigned) atoi(argv[2]);
+        consumer_thread_count = (unsigned) atoi(argv[3]);
+    }
 
-    /* 2. Initialize buffer */
+    pthread_t producer_threads[producer_thread_count];
+    pthread_t consumer_threads[consumer_thread_count];
+    sem_init(&empty_sem, 0, BUFFER_SIZE);
+    sem_init(&full_sem, 0, 0);
+    pthread_mutex_init(&mutex, nullptr);
 
-    /* 3. Create producer thread(s) */
+    for (pthread_t producer_thread : producer_threads) {
+        pthread_create(&producer_thread, nullptr, producer, nullptr);
+    }
 
-    /* 4. Create consumer thread(s) */
+    for (pthread_t consumer_thread : consumer_threads) {
+        pthread_create(&consumer_thread, nullptr, consumer, nullptr);
+    }
 
-    /* 5. Sleep */
+    sleep(main_thread_sleep_time);
 
-    /* 6. Exit */
+    printf("\n\n **** Time expired on main thread. Exiting. ****\n\n");
 
     return 0;
 }
 
 
-void *producer(void *param) {
 
-    buffer_item item;
-
-    while (true) {
-        /* sleep for a random period of time */
-
-        sleep(...);
-
-        /* generate a random number */
-
-        item = rand();
-
-        if (buffer().insert_item(item)) {
-            printf("report error condition");
-        } else {
-            printf("producer produced %d\n", item);
-        }
-
-    }
-}
-
-void *consumer(void *param) {
-
-    buffer_item item;
-
-    while (true) {
-
-        /* sleep for a random period of time */
-
-        sleep(...);
-
-        if (buffer().remove_item(&item)) {
-            fprintf("report error condition");
-        } else {
-            printf("consumer consumed %d\n",item);
-        }
-    }
-
-}
