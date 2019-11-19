@@ -45,8 +45,9 @@ void *producer(void *param) {
         usleep(sleep_dist(generator));
         sem_wait(&empty_sem);
         pthread_mutex_lock(&mutex);
+        item = item_dist(generator);
         /* beginning of critical section */
-        if (buffer().insert_item(item_dist(generator)) == 1) {
+        if (buffer().insert_item(item) == 1) {
             printf("PRODUCER THREAD: report error condition\n");
         } else {
             printf("\nitem %d inserted by a producer.\n", item);
@@ -67,7 +68,7 @@ void *consumer(void *param) {
         usleep(sleep_dist(generator));
         sem_wait(&full_sem);
         pthread_mutex_lock(&mutex);
-        /* beginning of critcal section */
+        /* beginning of critical section */
         if (buffer().remove_item(&item) == 1) {
             printf("CONSUMER THREAD: report error condition\n");
         } else {
@@ -135,6 +136,8 @@ int main(int argc, char **argv) {
     }
 
     sleep(main_thread_sleep_time);
+
+    printf("\n\n **** Time expired on main thread. Exiting. ****\n\n");
 
     return 0;
 }

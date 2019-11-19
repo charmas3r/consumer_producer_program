@@ -5,7 +5,7 @@
 #include <iostream>
 #include "buffer.h"
 
-buffer_item circular_buffer[BUFFER_SIZE] = {};
+buffer_item circular_buffer[BUFFER_SIZE];
 int write_position = 0;
 int read_position = 0;
 int buffer_count = 0;
@@ -22,7 +22,7 @@ int buffer::insert_item(buffer_item item) {
 }
 
 int buffer::remove_item(buffer_item *item) {
-    if (buffer_count > 1) {
+    if (buffer_count > 0) {
         // ok to remove
         *item = circular_buffer[read_position];
         read_position = (read_position + 1) % BUFFER_SIZE;
@@ -34,20 +34,15 @@ int buffer::remove_item(buffer_item *item) {
 }
 
 void buffer::display_buffer() {
-    int temp_counter = buffer_count;
-    if (buffer_count > 0) {
-        std::cout << "The current content of the buffer is [";
-        for (buffer_item x : circular_buffer) {
-            --temp_counter;
-            if (temp_counter == 0) {
-                std::cout << x << "]" << std::endl;
-            } else if (temp_counter > 0) {
-                std::cout << x << ", ";
-            } else {
-                break;
-            }
+    std::cout << "The current content of the buffer is [";
+    int j = 0;
+    for (int i = read_position; j < buffer_count; i = (i + 1) % BUFFER_SIZE, j++) {
+        if (j == buffer_count - 1) {
+            std::cout << circular_buffer[i] << "";
+            break;
+        } else {
+            std::cout << circular_buffer[i] << ", ";
         }
-    } else {
-        std::cout << "]" << std::endl;
     }
+    std::cout << "] \n";
 }
